@@ -8,196 +8,211 @@
 <style>
 body{
 margin:0;
+font-family:'Segoe UI',sans-serif;
+background: linear-gradient(135deg,#ffd6ec,#cde7ff,#e6d6ff);
 overflow:hidden;
-font-family:'Prompt',sans-serif;
-background:linear-gradient(135deg,#ffd6f6,#cce6ff,#e6d6ff);
-background-size:400% 400%;
-animation:bgMove 12s ease infinite;
-color:#fff;
-text-align:center;
-}
-@keyframes bgMove{
-0%{background-position:0% 50%}
-50%{background-position:100% 50%}
-100%{background-position:0% 50%}
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+color:#555;
 }
 
-.screen{display:none;position:absolute;top:0;left:0;width:100%;height:100%;justify-content:center;align-items:center;flex-direction:column;}
+.hidden{display:none;}
+.center{text-align:center;}
 
-#loading{display:flex;}
-.dot{animation:blink 1s infinite}
-@keyframes blink{0%,100%{opacity:0}50%{opacity:1}}
-
-.keypad button{
-width:70px;height:70px;margin:8px;
-border:none;border-radius:20px;
-font-size:22px;
-background:#ffffff30;
-backdrop-filter:blur(10px);
-color:#fff;
-box-shadow:0 0 15px #fff5;
-transition:.2s;
+button{
+padding:15px;
+border:none;
+border-radius:20px;
+background:#ffb3da;
+color:white;
+font-size:20px;
+margin:5px;
+transition:0.3s;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
 }
-.keypad button:active{transform:scale(.9)}
+button:active{
+transform:scale(0.9);
+}
 
-.cake{
-font-size:90px;
+.keypad{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+max-width:280px;
+margin:auto;
+}
+
+#cake{
+font-size:120px;
 cursor:pointer;
-text-shadow:0 0 25px #fff;
+animation:pulse 2s infinite;
+filter: drop-shadow(0 0 15px rgba(255,255,255,0.7));
+}
+
+@keyframes pulse{
+0%{transform:scale(1);}
+50%{transform:scale(1.05);}
+100%{transform:scale(1);}
 }
 
 .candle{
-font-size:30px;
+font-size:35px;
+margin:3px;
 }
 
-#letter{
+#letterBox{
+position:fixed;
+bottom:-100%;
+left:0;
+right:0;
+margin:auto;
+width:90%;
+max-width:400px;
 background:white;
-color:#ff69b4;
-padding:25px;
-border-radius:25px;
-width:85%;
-max-height:60%;
-overflow-y:auto;
-box-shadow:0 0 40px #fff;
+border-radius:20px;
+padding:20px;
+box-shadow:0 20px 40px rgba(0,0,0,0.2);
+transition:1s;
+max-height:70vh;
+overflow:auto;
 }
 
-.smallDate{
-position:absolute;
+#letterBox.show{
+bottom:10%;
+}
+
+.confetti{
+position:fixed;
+width:8px;
+height:8px;
+top:-10px;
+animation:fall 3s linear forwards;
+}
+
+@keyframes fall{
+to{transform:translateY(110vh) rotate(360deg);}
+}
+
+#birthdayDate{
+position:fixed;
 bottom:10px;
 right:15px;
 font-size:14px;
-opacity:.7;
+opacity:0.7;
 }
 
-canvas{
-position:absolute;
-top:0;
-left:0;
-pointer-events:none;
+.star{
+position:fixed;
+width:4px;
+height:4px;
+background:white;
+border-radius:50%;
+animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+from{opacity:0.2;}
+to{opacity:1;}
 }
 </style>
 </head>
 
 <body>
 
-<div id="loading" class="screen">
-<h2>กำลังเตรียมเซอร์ไพรส์<span class="dot">...</span></h2>
+<!-- Loading -->
+<div id="loading" class="center">
+<h2>กำลังเตรียมเซอร์ไพรส์<span id="dots">...</span></h2>
 </div>
 
-<div id="password" class="screen">
-<h3>ใส่รหัสเลยน้า 💖</h3>
-<div id="dots"></div>
+<!-- Lock Screen -->
+<div id="lock" class="center hidden">
+<h2>ใส่รหัสก่อนน้า 💕</h2>
+<h1 id="display">●●●●●●</h1>
 <div class="keypad">
-<div>
-<button onclick="press(1)">1</button>
-<button onclick="press(2)">2</button>
-<button onclick="press(3)">3</button>
-</div>
-<div>
-<button onclick="press(4)">4</button>
-<button onclick="press(5)">5</button>
-<button onclick="press(6)">6</button>
-</div>
-<div>
-<button onclick="press(7)">7</button>
-<button onclick="press(8)">8</button>
-<button onclick="press(9)">9</button>
-</div>
-<div>
-<button onclick="press(0)">0</button>
-</div>
+<button onclick="press('0')">0</button>
+<button onclick="press('1')">1</button>
+<button onclick="press('2')">2</button>
+<button onclick="press('3')">3</button>
+<button onclick="press('4')">4</button>
+<button onclick="press('5')">5</button>
+<button onclick="press('6')">6</button>
+<button onclick="press('7')">7</button>
+<button onclick="press('8')">8</button>
+<button onclick="press('9')">9</button>
 </div>
 </div>
 
-<div id="cakeScreen" class="screen">
-<div class="cake" onclick="addCandle()">🎂</div>
-<div id="message">กดที่เค้ก 5 ครั้งเลยย 💕</div>
+<!-- Cake Page -->
+<div id="main" class="center hidden">
+<h2 id="cakeText">กดสิกดที่เค้ก!! 🎂</h2>
+<div id="cake" onclick="cakeClick()">🎂</div>
 <div id="candles"></div>
 </div>
 
-<div id="letterScreen" class="screen">
-<div id="letter"></div>
-<div class="smallDate">1 มี.ค.</div>
+<!-- Letter -->
+<div id="letterBox">
+<h3>💌 ถึงที่รัก 💌</h3>
+<p id="letterText"></p>
 </div>
 
-<canvas id="fireworks"></canvas>
-<audio id="song" src="song.mp3"></audio>
+<div id="birthdayDate">1 มี.ค.</div>
 
 <script>
-setTimeout(()=>{
-document.getElementById('loading').style.display="none";
-document.getElementById('password').style.display="flex";
-},3000);
-
+let code="010269";
 let input="";
-function press(n){
-if(input.length<6){
-input+=n;
-updateDots();
-}
-if(input==="010269"){
-alert("คิดถึงเค้าป่าววว 💕");
-document.getElementById('password').style.display="none";
-document.getElementById('cakeScreen').style.display="flex";
-}
-}
-
-function updateDots(){
-document.getElementById('dots').innerHTML="●".repeat(input.length);
-}
-
+let stage=0;
 let candleCount=0;
-let readyToBlow=false;
 
-function addCandle(){
+setTimeout(()=>{
+document.getElementById("loading").classList.add("hidden");
+document.getElementById("lock").classList.remove("hidden");
+},2500);
+
+function press(num){
+navigator.vibrate?.(50);
+if(input.length<6){
+input+=num;
+}
+if(input===code){
+alert("คิดถึงเค้าป่าววว 💕");
+document.getElementById("lock").classList.add("hidden");
+document.getElementById("main").classList.remove("hidden");
+}
+}
+
+function cakeClick(){
+navigator.vibrate?.(50);
+if(stage===0){
 if(candleCount<5){
-candleCount++;
 let c=document.createElement("span");
-c.innerHTML="🕯️";
+c.innerText="🕯️";
 c.className="candle";
 document.getElementById("candles").appendChild(c);
-
-if(candleCount==5){
-document.getElementById("message").innerHTML="กดอีกครั้งเพื่อเป่า 💨";
-readyToBlow=true;
-}
-}else if(readyToBlow){
-blowCandles();
-setTimeout(()=>{
-document.getElementById('cakeScreen').style.display="none";
-openLetter();
-},800);
+candleCount++;
+if(candleCount===5){
+document.getElementById("cakeText").innerText="เป่าเลยยยย 💨";
+stage=1;
 }
 }
-
-function blowCandles(){
+}else if(stage===1){
 let candles=document.querySelectorAll(".candle");
-candles.forEach(c=>c.innerHTML="💨");
-}
-
-function openLetter(){
-document.getElementById('letterScreen').style.display="flex";
-document.getElementById('song').volume=0;
-document.getElementById('song').play();
-fadeInMusic();
-launchFireworks();
-typeMessage();
-}
-
-function fadeInMusic(){
-let song=document.getElementById('song');
-let vol=0;
-let fade=setInterval(()=>{
-if(vol<1){
-vol+=0.05;
-song.volume=vol;
+if(candles.length>1){
+candles[candles.length-1].remove();
 }else{
-clearInterval(fade);
+stage=2;
 }
-},200);
+}else if(stage===2){
+document.getElementById("letterBox").classList.add("show");
+startLetter();
+launchConfetti();
+stage=3;
+}
 }
 
-const text=`สุขสันต์วันเกิดนะที่รักแก่่ขึ้นอีกปีเเระ ขอบคุณที่พ่อและแม่ทำให้เธอเกิดมาเพื่อได้มาเจอเค้า~~~~
+function startLetter(){
+let text=`สุขสันต์วันเกิดนะที่รักแก่่ขึ้นอีกปีเเระ ขอบคุณที่พ่อและแม่ทำให้เธอเกิดมาเพื่อได้มาเจอเค้า~~~~
 
 ปีนี้ขอให้เป็นปีที่ดี๊ดีน้าาา ไม่รู้ว่าปีที่ผ่านๆมามันดีรึป่าวแต่ที่รู้ๆปีนี้ต้องดีแน่นอนเพราะเธอเจอเค้าไงล่าอุอุอุ อยากให้ที่รักยิ้มเย้อๆไม่เครียสมีฟามสุขตลอดปีตลอดชาติ แล้วก็ๆขอบคุณที่ให้หนูเป็นส่วนนึงในชีวิตของเธอนะะะ
 
@@ -213,63 +228,34 @@ const text=`สุขสันต์วันเกิดนะที่รั�
 
 สุขสันต์วันเกิดอีกครั้งนะที่รักกกก 🎂🎉💘 รักนะมาก ๆ เลยยยยย(มากกว่าด้วย)`;
 
-function typeMessage(){
 let i=0;
-let speed=40;
 function type(){
 if(i<text.length){
-document.getElementById("letter").innerHTML+=text.charAt(i);
+document.getElementById("letterText").innerHTML+=text.charAt(i);
 i++;
-setTimeout(type,speed);
+setTimeout(type,30);
 }
 }
 type();
 }
 
-const canvas=document.getElementById("fireworks");
-const ctx=canvas.getContext("2d");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
-let particles=[];
-
-function launchFireworks(){
-for(let i=0;i<5;i++){
-setTimeout(()=>explode(Math.random()*canvas.width,Math.random()*canvas.height/2),i*400);
+function launchConfetti(){
+for(let i=0;i<60;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"vw";
+c.style.background=`hsl(${Math.random()*360},70%,80%)`;
+document.body.appendChild(c);
 }
 }
 
-function explode(x,y){
-for(let i=0;i<80;i++){
-let angle=Math.random()*2*Math.PI;
-let speed=Math.random()*4+2;
-particles.push({
-x:x,
-y:y,
-vx:Math.cos(angle)*speed,
-vy:Math.sin(angle)*speed,
-life:60
-});
+for(let i=0;i<40;i++){
+let s=document.createElement("div");
+s.className="star";
+s.style.top=Math.random()*100+"vh";
+s.style.left=Math.random()*100+"vw";
+document.body.appendChild(s);
 }
-}
-
-function animate(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-particles.forEach((p,index)=>{
-p.x+=p.vx;
-p.y+=p.vy;
-p.life--;
-ctx.fillStyle="rgba(255,255,255,"+p.life/60+")";
-ctx.beginPath();
-ctx.arc(p.x,p.y,3,0,2*Math.PI);
-ctx.fill();
-if(p.life<=0){
-particles.splice(index,1);
-}
-});
-requestAnimationFrame(animate);
-}
-animate();
 </script>
 
 </body>
